@@ -66,12 +66,16 @@ def get_submodules(repo):
 @click.command(context_settings={'help_option_names': ['-h', '--help']})
 @click.version_option(version=__version__, prog_name='rclone')
 @click.option('-b', '--branch')
+@click.option('-c', '--commit')
 @click.argument('url', required=True)
 @click.argument('path', required=True)
-def cli(branch, url, path):
-    clone_cmd = ['git', 'clone', '--depth', '1']
+def cli(branch, commit, url, path):
+    clone_cmd = ['git', 'clone']
     if branch: clone_cmd.extend(['-b', branch])
+    if not commit: clone_cmd.extend(['--depth', '1'])
     subprocess.check_call(clone_cmd+[url, path])
+    if commit:
+        subprocess.check_call(['git', 'checkout', commit], cwd=path)
     for m in get_submodules(path):
         m.fetch()
 
